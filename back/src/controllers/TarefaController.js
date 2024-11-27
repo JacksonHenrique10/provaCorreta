@@ -9,7 +9,7 @@ export const TarefaController = {
       console.log(tarefa);
 
       const result = await tarefa.insertTarefa();
-      console.log(result);
+      // console.log(result);
 
       res.json({ result });
     } catch (error) {
@@ -39,10 +39,21 @@ export const TarefaController = {
 
   atualizarStatus: async (req, res) => {
     try {
+      console.log('Atualizando o status da tarefa aqui: ');
       const {id} = req.params;
       const {status} = req.body;
-      const newStatus = status.toUpperCase();
+      const newStatus = status;
       const tarefas = await Tarefa.atualizarStatus(id, newStatus);
+      res.json({ tarefas });
+    } catch (error) {
+      res.json({ message: error });
+    }
+  },
+  deletarTarefa: async (req, res) => {
+    try {
+      console.log('Deletando a tarefa');
+      const id = req.params;
+      const tarefas = await Tarefa.deletarTarefa(id);
       res.json({ tarefas });
     } catch (error) {
       res.json({ message: error });
