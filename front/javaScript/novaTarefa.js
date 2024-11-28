@@ -5,20 +5,48 @@ $(document).ready(function () {
       console.log(response.data);
 
       const userSelect = $("#nomeUser");
+
       userSelect.empty();
-      userSelect.append('<option value="">Selecione um usuário</option>');
+      userSelect.append('<option value="">Selecione um usuario</option>');
 
       const users = response.data.users;
-
       users.forEach((user) => {
         userSelect.append(
           `<option value="${user.id_usuario}">${user.nome}</option>`
         );
       });
+      carregarDadosTarefa();
+
+      // alert('Usuario cadastrado com sucesso');
     })
     .catch((error) => {
       console.log(error);
+
+      // alert('Ocorreu um erro');
     });
+
+  const taskId = sessionStorage.getItem("taskId");
+  console.log("Editar Tarefa:", taskId);
+  function carregarDadosTarefa() {
+    if (taskId) {
+      axios
+        .get(`${localStorage.getItem("ipApi")}listarTarefa/${taskId}`)
+        .then((response) => {
+          const tarefa = response.data.tarefa[0];
+          document.getElementById("descricao").value = tarefa.descricao;
+          document.getElementById("equipe").value = tarefa.equipe;
+
+          const nomeUserSelect = document.getElementById("nomeUser");
+          nomeUserSelect.value = tarefa.id_usuario;
+
+          const prioridadeSelect = document.getElementById("prioridade");
+          prioridadeSelect.value = tarefa.prioridade;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }
 
   $(document).off("submit", "#formNovaTarefa");
   $(document).on("submit", "#formNovaTarefa", async function (event) {
@@ -33,15 +61,32 @@ $(document).ready(function () {
       prioridade: document.getElementById("prioridade").value,
     };
 
-    axios
-      .post(`${localStorage.getItem("ipApi")}novaTarefa`, formData)
-      .then((response) => {
-        console.log(response.data);
-        alert('Tarefa Cadastrada com sucesso:' ,response.data)
-      })
-      .catch((error) => {
-        console.log(error);
-        alert('Ocorreu um erro ao cadastrar a tarefa: ', error);
-      });
+    if (!taskId) {
+      axios
+        .post(`${localStorage.getItem("ipApi")}novaTarefa`, formData)
+        .then((response) => {
+          console.log(response.data);
+          alert("Tarefa cadastrada com sucesso!");
+        })
+        .catch((error) => {
+          console.log(error);
+          alert("Ocorreu um erro ao cadastrar a tarefa.");
+        });
+    } else {
+      axios
+        .put(
+          `${localStorage.getItem("ipApi")}atualizarTarefa/${taskId}`,
+          formData
+        )
+        .then((response) => {
+          console.log(response.data);
+          alert("Tarefa cadastrada com sucesso!");
+        })
+        .catch((error) => {
+          console.log(error);
+          alert("Ocorreu um erro ao alterar a tarefa.");
+        });
+        sessionStorage.removeItem('taskId');
+    }
   });
 });

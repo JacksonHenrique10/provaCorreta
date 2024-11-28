@@ -1,4 +1,5 @@
 $(document).ready(async function () {
+  sessionStorage.removeItem('taskId');
   const board = {
     "Não Iniciado": document.querySelector("#nao-iniciado"),
     "Em Desenvolvimento": document.querySelector("#em-desenvolvimento"),
@@ -19,8 +20,8 @@ $(document).ready(async function () {
     try {
       const response=await axios.get(`${localStorage.getItem("ipApi")}listarTarefas`);
       const tasks = response.data.tarefas;
-      console.log(response);
-      console.log(tasks);
+      // console.log(response);
+      // console.log(tasks);
 
       tasks.forEach((tarefa) => {
         const mappedStatus = statusMapping[tarefa.status?.toLowerCase()];
@@ -37,7 +38,7 @@ $(document).ready(async function () {
           
           <div class="card-actions">
             <button class="btn-edit" onclick="carregarPagina('novaTarefa')" href = "#" data-id="${tarefa.id_tarefa}">Editar</button>
-            <button class="btn-delete" onclick="carregarPagina('deletarTarefa)" data-id="${tarefa.id_tarefa}">Delete</button>
+            <button class="btn-delete" data-id="${tarefa.id_tarefa}">Delete</button>
           </div>
 
           <div class="card-status">
@@ -61,18 +62,46 @@ $(document).ready(async function () {
 
   await buscarTarefas();
 
-  $(document).off("click", ".btn-save-status");
-  $(document).on("click", ".btn-save-status", async function (event) {
+  $(document).off('click', '.btn-save-status');
+  $(document).on('click', '.btn-save-status', async function (event) {
     const taskId = $(this).data('id');
     const newStatus = $(`.status-dropdown[data-id='${taskId}']`).val();
-    console.log(newStatus);
-    
 
     try {
-      await axios.put(`${localStorage.getItem("ipApi")}atualizarStatus/${taskId}`, {status: newStatus});
+      await axios.put(`${localStorage.getItem('ipApi')}atualizarStatus/${taskId}`, {status: newStatus});
       await buscarTarefas();
     } catch (error) {
-      console.log("Erro ao atualizar status", error);      
+      console.error("Erro ao atualizar", error)
+      
     }
   })
+
+  $(document).off('click', '.btn-delete');
+  $(document).on('click', '.btn-delete', async function (event) {
+    const taskId = $(this).data('id');
+    const newStatus = $(`.status-dropdown[data-id='${taskId}']`).val();
+
+    try {
+      await axios.delete(`${localStorage.getItem('ipApi')}deletarTarefa/${taskId}`, {status: newStatus})
+      .then(response =>{
+        alert("Tarefa excluida")
+        buscarTarefas();
+      }).catch(error =>{
+
+      })
+      await deletarTarefa();
+    } catch (error) {
+      console.error("Erro ao deletar tarefa", error)
+      
+    }
+  })
+
+  $(document).off('click', '.btn-edit');
+  $(document).on('click', '.btn-edit', async function (event) {
+    const taskId = $(this).data('id');
+    sessionStorage.setItem("taskId", taskId);
+
+    console.log(taskId);
+  })
+
 });
