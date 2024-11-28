@@ -16,4 +16,4 @@ function carregarPagina(pagina) {
     });
 }
 sessionStorage.removeItem('taskId');
-localStorage.setItem("ipApi", "http://10.0.3.252:3000/");
+localStorage.setItem("ipApi", "http://10.0.3.149:3000/");
